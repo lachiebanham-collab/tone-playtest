@@ -72,9 +72,39 @@ function doPost(e) {
   }
 }
 
-// Lets you open the /exec URL in a browser to check the deployment is live.
-function doGet() {
-  return ContentService.createTextOutput("Tone playtest collector is running.");
+// Opening the /exec URL in a browser checks the deployment is live.
+// The results page calls it with ?view=results&key=... to read every answer;
+// the key must match the RESULTS_KEY script property (Project Settings -> Script Properties).
+function doGet(e) {
+  const params = (e && e.parameter) || {};
+  if (params.view !== "results") {
+    return ContentService.createTextOutput("Tone playtest collector is running.");
+  }
+
+  const expected = PropertiesService.getScriptProperties().getProperty("RESULTS_KEY");
+  if (!expected) return jsonOutput({ ok: false, error: "no_key_set" });
+  if (params.key !== expected) return jsonOutput({ ok: false, error: "wrong_key" });
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  const values = sheet.getDataRange().getValues();
+  const rawCol = columnIndex("__raw") - 1;
+  const rows = values.slice(1).map((row) => {
+    let data = null;
+    try { data = JSON.parse(row[rawCol]); } catch (err) { data = null; }
+    if (!data || typeof data !== "object") {
+      data = {};
+      COLUMNS.forEach(([, key], i) => { if (key !== "__raw") data[key] = row[i]; });
+    }
+    if (row[0] instanceof Date) data.submittedAt = row[0].toISOString();
+    return data;
+  });
+
+  return jsonOutput({ ok: true, rows: rows });
+}
+
+function jsonOutput(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // ---------------------------------------------------------------------------
