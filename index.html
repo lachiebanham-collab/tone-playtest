@@ -99,11 +99,6 @@
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .card { animation: none; } .progress > div { transition: none; } }
 
-  /* Mini Tone card: stacked overlapping colour blocks */
-  .blocks { display: flex; flex-direction: column; height: 148px; border-radius: 20px; overflow: hidden; }
-  .blocks > div { flex: 1; border-radius: 20px; margin-top: -20px; }
-  .blocks > div:first-child { margin-top: 0; }
-  .combo-caption { font-size: 12px; color: var(--secondary); margin: 8px 4px 0; }
 
   .eyebrow { font-size: 13px; color: var(--secondary); margin: 24px 0 6px; }
   .eyebrow:first-child { margin-top: 4px; }
@@ -255,15 +250,6 @@ function el(tag, attrs, ...children) {
   return node;
 }
 
-function comboBlock(step) {
-  const combo = COMBOS[step % COMBOS.length];
-  const names = combo.c.map((c) => c[0]);
-  const label = names.length > 1 ? names.slice(0, -1).join(", ") + " & " + names[names.length - 1] : names[0];
-  const blocks = el("div", { class: "blocks", role: "img", "aria-label": label },
-    combo.c.map(([, hex], i) => el("div", { style: `background:${hex};z-index:${combo.c.length - i};position:relative` })));
-  return [blocks, el("p", { class: "combo-caption" }, `#${String(combo.n).padStart(3, "0")} · ${label}`)];
-}
-
 function textInput(key, placeholder, multiline) {
   const attrs = { placeholder, id: "f-" + key, oninput: (e) => { state.answers[key] = e.target.value; saveDraft(); updateActions(); } };
   const node = multiline ? el("textarea", attrs) : el("input", Object.assign({ type: "text", autocomplete: "off" }, attrs));
@@ -299,7 +285,6 @@ function introScreen() {
 function aboutScreen() {
   const a = state.answers;
   return el("section", { class: "card" },
-    comboBlock(1),
     el("p", { class: "eyebrow" }, "First up"),
     el("h1", {}, "A bit about you"),
     el("div", { class: "field" },
@@ -332,7 +317,6 @@ function taskScreen(i) {
   note.value = task.note;
 
   return el("section", { class: "card" },
-    comboBlock(i + 2),
     el("p", { class: "eyebrow" }, `Task ${i + 1} of ${TASKS.length}`),
     el("h1", {}, TASKS[i].text),
     el("div", { class: "field" },
@@ -350,7 +334,6 @@ function overallScreen() {
   const a = state.answers;
   const otherOn = a.useFor.includes("Something else");
   return el("section", { class: "card" },
-    comboBlock(13),
     el("p", { class: "eyebrow" }, "Last bit"),
     el("h1", {}, "Overall thoughts"),
     el("div", { class: "field" },
@@ -381,7 +364,6 @@ function thanksScreen() {
   const status = el("p", { class: "status", id: "copyStatus", "aria-live": "polite" });
   const canShare = typeof navigator.share === "function";
   return el("section", { class: "card" },
-    comboBlock(14),
     el("p", { class: "eyebrow" }, connected ? "All sent" : "Nearly done"),
     el("h1", {}, connected ? "Thank you! Your answers are in." : "Thank you! One last step."),
     el("p", { class: "muted" }, connected
