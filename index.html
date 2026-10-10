@@ -167,6 +167,7 @@
   .btn-primary:disabled { opacity: 0.35; cursor: default; transform: none; }
   .btn-secondary { background: var(--fill-strong); }
   .btn-block { width: 100%; margin-top: 12px; }
+  .card-cta { margin-top: 24px; }
   .hint { text-align: center; font-size: 13px; color: var(--secondary); margin: 0 0 8px; min-height: 18px; }
 
   .status { margin-top: 16px; font-size: 15px; color: var(--secondary); }
@@ -290,7 +291,8 @@ function introScreen() {
       el("li", {}, "If you get stuck, it's totally fine to give up. That's the most useful feedback of all."),
       el("li", {}, "Start from a fresh install so you see the welcome screens."),
       el("li", {}, "Your progress saves as you go, so you can flick between Tone and this page.")
-    )
+    ),
+    el("button", { class: "btn btn-primary btn-block card-cta", type: "button", onclick: () => go(1) }, "Let's go")
   );
 }
 
@@ -413,7 +415,8 @@ function hintFor() {
 function updateActions() {
   const key = STEPS[state.step];
   const next = $("#nextBtn"), back = $("#backBtn");
-  $("#actions").hidden = key === "thanks";
+  // The intro carries its own button inside the card.
+  $("#actions").hidden = key === "thanks" || key === "intro";
   back.hidden = state.step === 0;
   next.disabled = !canAdvance();
   next.textContent = key === "intro" ? "Let's go" : key === "overall" ? "Send answers" : "Next";
