@@ -219,7 +219,8 @@
   <div id="screen"></div>
 </main>
 
-<script src="shared.js"></script>
+<!-- Bump ?v= whenever shared.js changes, so browsers never pair a new page with a cached old copy. -->
+<script src="shared.js?v=26ee75a3"></script>
 <script>
 const STORAGE_KEY = "tone-playtest-v1";
 
@@ -474,6 +475,20 @@ function addCardNav(screen, key) {
 }
 
 function render(scrollTop = true) {
+  try {
+    renderStep(scrollTop);
+  } catch (err) {
+    // Never leave a blank page: offer a reload (keeps progress) or a fresh start.
+    console.error(err);
+    $("#screen").replaceChildren(el("section", { class: "card" },
+      el("h1", {}, "Something went wrong"),
+      el("p", { class: "muted" }, "Try reloading the page. Your answers so far are saved."),
+      el("button", { class: "btn btn-primary btn-block card-cta", type: "button", onclick: () => location.reload() }, "Reload"),
+      el("button", { class: "btn btn-secondary btn-block", type: "button", onclick: () => { clearDraft(); location.reload(); } }, "Start over")));
+  }
+}
+
+function renderStep(scrollTop) {
   const key = STEPS[state.step];
   let screen;
   if (key === "intro") screen = introScreen();
