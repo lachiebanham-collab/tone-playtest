@@ -120,7 +120,46 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Tone")
     .addItem("Format sheet", "formatSheet")
+    .addSeparator()
+    .addItem("Remove test entries", "removeTestEntries")
+    .addItem("Remove entries by name...", "removeEntriesByName")
     .addToUi();
+}
+
+// ---------------------------------------------------------------------------
+// Cleanup: delete response rows by tester name (asks before deleting).
+// ---------------------------------------------------------------------------
+
+function removeTestEntries() {
+  removeRowsWhere((name) => /^test\b/i.test(name), "test entries (names starting with \"TEST\")");
+}
+
+function removeEntriesByName() {
+  const ui = SpreadsheetApp.getUi();
+  const answer = ui.prompt("Remove entries by name", "Tester name to remove (not case-sensitive):", ui.ButtonSet.OK_CANCEL);
+  if (answer.getSelectedButton() !== ui.Button.OK) return;
+  const target = answer.getResponseText().trim().toLowerCase();
+  if (!target) return;
+  removeRowsWhere((name) => name.toLowerCase() === target, `entries named "${answer.getResponseText().trim()}"`);
+}
+
+function removeRowsWhere(matches, description) {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) { ui.alert("There are no responses yet."); return; }
+
+  const nameCol = columnIndex("name");
+  const names = sheet.getRange(2, nameCol, lastRow - 1, 1).getValues().map((r) => String(r[0]).trim());
+  const rows = names.map((name, i) => (matches(name) ? i + 2 : null)).filter((r) => r != null);
+  if (!rows.length) { ui.alert(`No ${description} found.`); return; }
+
+  const confirm = ui.alert(`Delete ${rows.length} row${rows.length === 1 ? "" : "s"}?`,
+    `This removes ${description}. It can't be undone (except with Edit -> Undo).`, ui.ButtonSet.YES_NO);
+  if (confirm !== ui.Button.YES) return;
+
+  rows.reverse().forEach((r) => sheet.deleteRow(r)); // bottom-up so row numbers stay valid
+  ui.alert(`Deleted ${rows.length} row${rows.length === 1 ? "" : "s"}.`);
 }
 
 function columnIndex(key) {
