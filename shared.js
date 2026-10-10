@@ -13,8 +13,8 @@ const TASKS = [
   { short: "Similar combination", text: "Open one of your saved combinations and find a similar one." },
   { short: "Palette from photo", text: "Make a palette from a photo in your camera roll, change it to 3 colours, and save it." },
   { short: "Share as image", text: "Share that palette as an image. Flick through the layouts and pick the one you like best." },
-  { short: "Choose a colour", text: "Find classic combinations that use a green you like." },
-  { short: "Describe a feeling", text: "Turn the feeling “a lazy Sunday morning” (or one of your own) into a palette and save it. Then find classic combinations that match it." },
+  { short: "Choose a colour", text: "Find combinations that use a green you like." },
+  { short: "Describe a feeling", text: "Turn the feeling “a lazy Sunday morning” (or one of your own) into a palette and save it. Then find combinations that match it." },
   { short: "Hex codes & dark mode", text: "Make the cards show each colour's hex code, then switch the app to dark mode." }
 ];
 
