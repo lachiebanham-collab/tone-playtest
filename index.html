@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Tone Playtest</title>
+<meta name="description" content="Help test Tone, a colour combination app inspired by Sanzo Wada.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='14' rx='5' fill='%23f9c1ce'/%3E%3Crect y='9' width='32' height='14' rx='5' fill='%23fdd4bd'/%3E%3Crect y='18' width='32' height='14' rx='5' fill='%2378cdd0'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #F2F2F7;
+    --card: #FFFFFF;
+    --text: #1C1C1E;
+    --secondary: #6E6E73;
+    --tertiary: #AEAEB2;
+    --fill: #E9E9EE;
+    --fill-strong: #DCDCE1;
+    --hairline: rgba(60, 60, 67, 0.18);
+    --accent: #FF2D55;
+    --accent-text: #FFFFFF;
+    --accent-soft: rgba(255, 45, 85, 0.12);
+    --warn-bg: #FFF4D6;
+    --warn-text: #6B4E00;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111113;
+      --card: #1C1C1E;
+      --text: #F2F2F7;
+      --secondary: #98989F;
+      --tertiary: #636366;
+      --fill: #2C2C2E;
+      --fill-strong: #3A3A3C;
+      --hairline: rgba(235, 235, 245, 0.16);
+      --accent: #FF375F;
+      --accent-soft: rgba(255, 55, 95, 0.18);
+      --warn-bg: #3A2F12;
+      --warn-text: #F3D58A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111113;
+    --card: #1C1C1E;
+    --text: #F2F2F7;
+    --secondary: #98989F;
+    --tertiary: #636366;
+    --fill: #2C2C2E;
+    --fill-strong: #3A3A3C;
+    --hairline: rgba(235, 235, 245, 0.16);
+    --accent: #FF375F;
+    --accent-soft: rgba(255, 55, 95, 0.18);
+    --warn-bg: #3A2F12;
+    --warn-text: #F3D58A;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+
+  .page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: max(16px, env(safe-area-inset-top)) 16px calc(120px + env(safe-area-inset-bottom));
+  }
+
+  /* Top bar */
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 8px 4px 16px; }
+  .wordmark { font-weight: 500; font-size: 15px; letter-spacing: -0.03em; }
+  .progress { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.35s ease; }
+  .stepcount { font-size: 13px; color: var(--secondary); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
+
+  .notice {
+    background: var(--warn-bg); color: var(--warn-text);
+    border-radius: 16px; padding: 12px 16px; font-size: 15px; margin-bottom: 12px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius: 32px;
+    padding: 20px;
+    animation: rise 0.28s ease both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .card { animation: none; } .progress > div { transition: none; } }
+
+  /* Mini Tone card: stacked overlapping colour blocks */
+  .blocks { display: flex; flex-direction: column; height: 148px; border-radius: 20px; overflow: hidden; }
+  .blocks > div { flex: 1; border-radius: 20px; margin-top: -20px; }
+  .blocks > div:first-child { margin-top: 0; }
+  .combo-caption { font-size: 12px; color: var(--secondary); margin: 8px 4px 0; }
+
+  .eyebrow { font-size: 13px; color: var(--secondary); margin: 24px 0 6px; }
+  h1 { font-size: 26px; line-height: 1.23; font-weight: 400; letter-spacing: -0.015em; margin: 0; }
+  h2 { font-size: 17px; font-weight: 500; margin: 0 0 10px; letter-spacing: -0.01em; }
+  p { margin: 12px 0 0; }
+  .muted { color: var(--secondary); font-size: 16px; }
+  .small { font-size: 13px; color: var(--secondary); }
+  ul.tidy { margin: 12px 0 0; padding-left: 20px; color: var(--secondary); font-size: 16px; }
+  ul.tidy li + li { margin-top: 6px; }
+
+  .field { margin-top: 28px; }
+  .field label.q, .field .q { display: block; font-size: 17px; font-weight: 500; margin-bottom: 10px; }
+  .optional { font-weight: 400; color: var(--tertiary); font-size: 15px; }
+  input[type="text"], textarea {
+    width: 100%; border: none; outline: none;
+    background: var(--fill); border-radius: 14px;
+    padding: 13px 14px; font-size: 17px;
+    transition: box-shadow 0.15s ease;
+  }
+  textarea { min-height: 84px; resize: vertical; line-height: 1.35; }
+  input[type="text"]:focus, textarea:focus { box-shadow: 0 0 0 2px var(--accent); }
+  ::placeholder { color: var(--tertiary); }
+
+  /* Ease scale */
+  .scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .scale button {
+    aspect-ratio: 1; max-height: 60px; border: none; border-radius: 16px;
+    background: var(--fill); font-size: 20px; font-variant-numeric: tabular-nums;
+    cursor: pointer; transition: transform 0.12s ease, background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .scale button:active { transform: scale(0.94); }
+  .scale button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+  .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--secondary); margin-top: 8px; }
+  .scale-readout { min-height: 22px; margin-top: 10px; font-size: 15px; color: var(--accent); font-weight: 500; }
+
+  /* Choice pills */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    border: none; border-radius: 999px; background: var(--fill);
+    padding: 10px 16px; font-size: 16px; cursor: pointer;
+    transition: background 0.15s ease; -webkit-tap-highlight-color: transparent;
+  }
+  .pill[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+  .other-input { margin-top: 10px; }
+
+  /* Bottom action bar */
+  .actions {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+  }
+  .actions-inner { max-width: 560px; margin: 0 auto; display: flex; gap: 10px; }
+  .btn {
+    border: none; border-radius: 999px; padding: 15px 22px; font-size: 17px; cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.12s ease; -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { flex: 1; background: var(--accent); color: var(--accent-text); font-weight: 500; }
+  .btn-primary:disabled { opacity: 0.35; cursor: default; transform: none; }
+  .btn-secondary { background: var(--fill-strong); }
+  .btn-block { width: 100%; margin-top: 12px; }
+  .hint { text-align: center; font-size: 13px; color: var(--secondary); margin: 0 0 8px; min-height: 18px; }
+
+  .status { margin-top: 16px; font-size: 15px; color: var(--secondary); }
+  .status.error { color: var(--accent); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="topbar">
+    <span class="wordmark">tone</span>
+    <div class="progress" aria-hidden="true"><div id="progressFill"></div></div>
+    <span class="stepcount" id="stepCount"></span>
+  </div>
+  <div class="notice" id="notConnected" hidden>
+    Heads up: answers aren't connected to a sheet yet. You can still fill it in and copy your answers at the end.
+  </div>
+  <div id="screen"></div>
+</main>
+
+<div class="actions" id="actions">
+  <p class="hint" id="hint"></p>
+  <div class="actions-inner">
+    <button class="btn btn-secondary" id="backBtn" type="button">Back</button>
+    <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Paste the Google Apps Script web app URL (ends in /exec) here.
+const SCRIPT_URL = "";
+// ─────────────────────────────────────────────────────────────
+
+const STORAGE_KEY = "tone-playtest-v1";
+
+const TASKS = [
+  { short: "Swipe deck", text: "Get through the welcome screens, then save two combinations you love and pass on three you don't." },
+  { short: "Undo", text: "Oops — you passed on one by mistake. Bring it back." },
+  { short: "Pin a colour", text: "You love one particular colour on the card in front of you. Get Tone to only show you combinations that include that colour." },
+  { short: "New collection", text: "Put a combination you like into a new collection called “Bedroom”, with a photo as its cover." },
+  { short: "Saved + filter", text: "Find everything you've saved, then narrow it down to just the ones with blue in them." },
+  { short: "Similar & Vol 2", text: "Open one of your saved combinations and find a similar one. Then have a look through the second Sanzo Wada book." },
+  { short: "Palette from photo", text: "Make a palette from a photo in your camera roll, change it to 3 colours, and save it." },
+  { short: "Share as image", text: "Share that palette as an image. Flick through the layouts and pick the one you like best." },
+  { short: "Choose a colour", text: "Find classic combinations that use a green you like." },
+  { short: "Describe a feeling", text: "Turn the feeling “a lazy Sunday morning” (or one of your own) into a palette and save it. Then find classic combinations that match it." },
+  { short: "Hex codes & dark mode", text: "Make the cards show each colour's hex code, then switch the app to dark mode." }
+];
+
+const EASE_LABELS = ["Couldn't do it", "Really hard", "Pretty tricky", "Got there", "Easy", "Super easy"];
+const DESIGN_OPTIONS = ["Nope", "For fun", "For work"];
+const KEEP_OPTIONS = ["Yep", "Maybe", "Nah"];
+const USE_OPTIONS = ["Home & interiors", "Outfits", "Design work", "Art", "Events & weddings", "Just for fun", "Something else"];
+
+// Real combinations from A Dictionary of Colour Combinations — one per screen.
+const COMBOS = [
+  { n: 176, c: [["Hermosa Pink", "#f9c1ce"], ["Seashell Pink", "#fdd4bd"], ["Calamine Blue", "#78cdd0"]] },
+  { n: 203, c: [["Pale Lemon Yellow", "#ffefae"], ["Vinaceous Cinnamon", "#eea78c"], ["Lincoln Green", "#555832"]] },
+  { n: 12, c: [["Isabella Color", "#c3a55c"], ["Green Blue", "#2dbc94"]] },
+  { n: 128, c: [["Corinthian Pink", "#f8b6ba"], ["Venice Green", "#62c6bf"], ["Eupatorium Purple", "#bf5892"], ["Light Mauve", "#9161f2"]] },
+  { n: 91, c: [["Vistoris Lake", "#6d4145"], ["Orange Rufous", "#c16b27"]] },
+  { n: 302, c: [["Cream Yellow", "#fdbf68"], ["Ecru", "#c2ae93"], ["Nile Blue", "#bce4e5"], ["Antwerp Blue", "#008aa1"]] },
+  { n: 236, c: [["Khaki", "#bc892b"], ["Deep Lyons Blue", "#1c4286"], ["Purple Drab", "#84565b"]] },
+  { n: 58, c: [["Hay's Russet", "#681916"], ["Sea Green", "#00b49b"]] },
+  { n: 276, c: [["Eosine Pink", "#f37f94"], ["Seashell Pink", "#fdd4bd"], ["Yellow Green", "#afd472"], ["Black", "#111314"]] },
+  { n: 141, c: [["Orange", "#f37420"], ["Yellow Green", "#afd472"], ["Dark Tyrian Blue", "#0d2b52"]] },
+  { n: 333, c: [["Burnt Sienna", "#ae5224"], ["Lemon Yellow", "#f8ed43"], ["Cobalt Green", "#96d1aa"], ["Blue", "#006eb8"]] },
+  { n: 37, c: [["Brick Red", "#a32100"], ["Red Violet", "#3400a3"]] },
+  { n: 345, c: [["Hay's Russet", "#681916"], ["Nile Blue", "#bce4e5"], ["Venice Green", "#62c6bf"], ["Blue Violet", "#6450a1"]] },
+  { n: 251, c: [["Red", "#a72144"], ["Yellow", "#fff200"], ["Diamine Green", "#008842"], ["Slate", "#1b3644"]] },
+  { n: 9, c: [["Violet Red", "#3d0079"], ["Dull Blue Violet", "#80719e"]] }
+];
+
+// Screen order: intro, about, 11 tasks, overall, thanks.
+const STEPS = ["intro", "about", ...TASKS.map((_, i) => "task" + i), "overall", "thanks"];
+const LAST_INPUT_STEP = STEPS.indexOf("overall");
+
+function blankAnswers() {
+  return {
+    name: "", iphone: "", design: "",
+    tasks: TASKS.map(() => ({ score: null, note: "" })),
+    keep: "", loved: "", bugged: "", useFor: [], useForOther: "", oneMore: ""
+  };
+}
+
+let state = { step: 0, answers: blankAnswers(), submitted: false, sendFailed: false };
+
+// ── Draft persistence (per-device convenience only) ──────────
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    const base = blankAnswers();
+    const answers = Object.assign(base, saved.answers || {});
+    answers.tasks = base.tasks.map((t, i) => Object.assign(t, (saved.answers && saved.answers.tasks && saved.answers.tasks[i]) || {}));
+    state.answers = answers;
+    state.step = Math.min(Math.max(0, saved.step | 0), LAST_INPUT_STEP);
+  } catch (e) { /* storage unavailable or corrupt — start fresh */ }
+}
+function saveDraft() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ step: state.step, answers: state.answers })); } catch (e) {}
+}
+function clearDraft() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+
+// ── Rendering helpers ────────────────────────────────────────
+const $ = (sel) => document.querySelector(sel);
+function el(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else if (v === true) node.setAttribute(k, "");
+    else if (v !== false && v != null) node.setAttribute(k, v);
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+}
+
+function comboBlock(step) {
+  const combo = COMBOS[step % COMBOS.length];
+  const names = combo.c.map((c) => c[0]);
+  const label = names.length > 1 ? names.slice(0, -1).join(", ") + " & " + names[names.length - 1] : names[0];
+  const blocks = el("div", { class: "blocks", role: "img", "aria-label": label },
+    combo.c.map(([, hex], i) => el("div", { style: `background:${hex};z-index:${combo.c.length - i};position:relative` })));
+  return [blocks, el("p", { class: "combo-caption" }, `#${String(combo.n).padStart(3, "0")} · ${label}`)];
+}
+
+function textInput(key, placeholder, multiline) {
+  const attrs = { placeholder, id: "f-" + key, oninput: (e) => { state.answers[key] = e.target.value; saveDraft(); updateActions(); } };
+  const node = multiline ? el("textarea", attrs) : el("input", Object.assign({ type: "text", autocomplete: "off" }, attrs));
+  node.value = state.answers[key];
+  return node;
+}
+
+function pillGroup(options, isOn, onTap, label) {
+  return el("div", { class: "pills", role: "group", "aria-label": label },
+    options.map((opt) => el("button", {
+      class: "pill", type: "button", "aria-pressed": String(isOn(opt)),
+      onclick: () => { onTap(opt); saveDraft(); render(false); }
+    }, opt)));
+}
+
+// ── Screens ──────────────────────────────────────────────────
+function introScreen() {
+  return el("section", { class: "card" },
+    comboBlock(0),
+    el("p", { class: "eyebrow" }, "Tone playtest"),
+    el("h1", {}, "Hey! Thanks for helping test Tone."),
+    el("p", { class: "muted" }, "Tone is a pocket version of Sanzo Wada's A Dictionary of Colour Combinations — swipe through classic colour pairings, save the ones you love, and make palettes of your own."),
+    el("p", { class: "muted" }, "You'll get 11 little tasks. Try each one in the app, then come back here and say how easy it was. Takes about 20–30 minutes."),
+    el("ul", { class: "tidy" },
+      el("li", {}, "We're testing the app, not you — there are no wrong answers."),
+      el("li", {}, "If you get stuck, it's totally fine to give up. That's the most useful feedback of all."),
+      el("li", {}, "Start from a fresh install so you see the welcome screens."),
+      el("li", {}, "Your progress saves as you go, so you can flick between Tone and this page.")
+    )
+  );
+}
+
+function aboutScreen() {
+  const a = state.answers;
+  return el("section", { class: "card" },
+    comboBlock(1),
+    el("p", { class: "eyebrow" }, "First up"),
+    el("h1", {}, "A bit about you"),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-name" }, "Your name"),
+      textInput("name", "So Lachie knows who said what")),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-iphone" }, "Which iPhone? ", el("span", { class: "optional" }, "optional")),
+      textInput("iphone", "e.g. iPhone 15 Pro")),
+    el("div", { class: "field" },
+      el("span", { class: "q" }, "Do you do anything design-y?"),
+      pillGroup(DESIGN_OPTIONS, (o) => a.design === o, (o) => { a.design = a.design === o ? "" : o; }, "Design background"))
+  );
+}
+
+function taskScreen(i) {
+  const task = state.answers.tasks[i];
+  const readout = el("div", { class: "scale-readout", "aria-live": "polite" }, task.score == null ? "" : EASE_LABELS[task.score]);
+  const scale = el("div", { class: "scale", role: "group", "aria-label": "How easy was that, from 0 (couldn't do it) to 5 (super easy)" },
+    EASE_LABELS.map((label, n) => el("button", {
+      type: "button", "aria-pressed": String(task.score === n),
+      "aria-label": `${n} — ${label}`,
+      onclick: () => { task.score = n; saveDraft(); render(false); }
+    }, String(n))));
+
+  const note = el("input", {
+    type: "text", id: "f-note", autocomplete: "off",
+    placeholder: i === 0 ? "e.g. where did you look first?" : "Where did you look? What surprised you?",
+    oninput: (e) => { task.note = e.target.value; saveDraft(); }
+  });
+  note.value = task.note;
+
+  return el("section", { class: "card" },
+    comboBlock(i + 2),
+    el("p", { class: "eyebrow" }, `Task ${i + 1} of ${TASKS.length}`),
+    el("h1", {}, TASKS[i].text),
+    el("div", { class: "field" },
+      el("span", { class: "q" }, "How easy was that?"),
+      scale,
+      el("div", { class: "scale-ends", "aria-hidden": "true" }, el("span", {}, "0 · Couldn't do it"), el("span", {}, "5 · Super easy")),
+      readout),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-note" }, "Anything to add? ", el("span", { class: "optional" }, "optional")),
+      note)
+  );
+}
+
+function overallScreen() {
+  const a = state.answers;
+  const otherOn = a.useFor.includes("Something else");
+  return el("section", { class: "card" },
+    comboBlock(13),
+    el("p", { class: "eyebrow" }, "Last bit"),
+    el("h1", {}, "Overall thoughts"),
+    el("div", { class: "field" },
+      el("span", { class: "q" }, "Would you keep Tone on your phone?"),
+      pillGroup(KEEP_OPTIONS, (o) => a.keep === o, (o) => { a.keep = a.keep === o ? "" : o; }, "Would you keep Tone")),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-loved" }, "What did you love? ", el("span", { class: "optional" }, "optional")),
+      textInput("loved", "Features, feel, anything", true)),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-bugged" }, "What bugged you? ", el("span", { class: "optional" }, "optional")),
+      textInput("bugged", "Confusing bits, bugs, annoyances", true)),
+    el("div", { class: "field" },
+      el("span", { class: "q" }, "What would you use it for? ", el("span", { class: "optional" }, "pick any")),
+      pillGroup(USE_OPTIONS, (o) => a.useFor.includes(o), (o) => {
+        a.useFor = a.useFor.includes(o) ? a.useFor.filter((x) => x !== o) : [...a.useFor, o];
+      }, "What would you use Tone for"),
+      otherOn ? el("div", { class: "other-input" }, textInput("useForOther", "Tell us more")) : null),
+    el("div", { class: "field" },
+      el("label", { class: "q", for: "f-oneMore" }, "If Tone could do one more thing for you, what would it be? ", el("span", { class: "optional" }, "optional")),
+      textInput("oneMore", "Dream big", true)),
+    el("div", { class: "status error", id: "sendError", hidden: !state.sendFailed },
+      "Couldn't send just now — check your connection and try again, or copy your answers on the next screen.")
+  );
+}
+
+function thanksScreen() {
+  const connected = Boolean(SCRIPT_URL) && !state.sendFailed;
+  const status = el("p", { class: "status", id: "copyStatus", "aria-live": "polite" });
+  const canShare = typeof navigator.share === "function";
+  return el("section", { class: "card" },
+    comboBlock(14),
+    el("p", { class: "eyebrow" }, connected ? "All sent" : "Nearly done"),
+    el("h1", {}, connected ? "Thank you! Your answers are in." : "Thank you! One last step."),
+    el("p", { class: "muted" }, connected
+      ? "Lachie really appreciates it. If you think of anything else later, just send him a message."
+      : "Your answers couldn't be sent automatically. Tap below and send them to Lachie in a message."),
+    canShare ? el("button", { class: "btn btn-primary btn-block", type: "button", onclick: () => shareAnswers(status) }, "Send my answers") : null,
+    el("button", { class: "btn btn-secondary btn-block", type: "button", onclick: () => copyAnswers(status) }, "Copy my answers"),
+    status
+  );
+}
+
+// ── Navigation ───────────────────────────────────────────────
+function canAdvance() {
+  const key = STEPS[state.step];
+  const a = state.answers;
+  if (key === "about") return a.name.trim().length > 0;
+  if (key.startsWith("task")) return a.tasks[+key.slice(4)].score != null;
+  if (key === "overall") return a.keep !== "";
+  return true;
+}
+
+function hintFor() {
+  const key = STEPS[state.step];
+  if (canAdvance()) return "";
+  if (key === "about") return "Add your name to keep going";
+  if (key.startsWith("task")) return "Tap a number — 0 if you couldn't do it";
+  if (key === "overall") return "Let us know if you'd keep it";
+  return "";
+}
+
+function updateActions() {
+  const key = STEPS[state.step];
+  const next = $("#nextBtn"), back = $("#backBtn");
+  $("#actions").hidden = key === "thanks";
+  back.hidden = state.step === 0;
+  next.disabled = !canAdvance();
+  next.textContent = key === "intro" ? "Let's go" : key === "overall" ? "Send answers" : "Next";
+  $("#hint").textContent = hintFor();
+}
+
+function render(scrollTop = true) {
+  const key = STEPS[state.step];
+  let screen;
+  if (key === "intro") screen = introScreen();
+  else if (key === "about") screen = aboutScreen();
+  else if (key.startsWith("task")) screen = taskScreen(+key.slice(4));
+  else if (key === "overall") screen = overallScreen();
+  else screen = thanksScreen();
+
+  // Re-rendering in place (a tap on a pill/scale) shouldn't replay the entrance animation.
+  if (!scrollTop) screen.style.animation = "none";
+  $("#screen").replaceChildren(screen);
+
+  const pct = Math.round((Math.min(state.step, LAST_INPUT_STEP) / LAST_INPUT_STEP) * 100);
+  $("#progressFill").style.width = (key === "thanks" ? 100 : pct) + "%";
+  $("#stepCount").textContent = key.startsWith("task") ? `${+key.slice(4) + 1}/${TASKS.length}` : "";
+  $("#notConnected").hidden = Boolean(SCRIPT_URL) || key === "thanks";
+  updateActions();
+  if (scrollTop) window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+
+function go(delta) {
+  state.step = Math.min(Math.max(0, state.step + delta), STEPS.length - 1);
+  if (STEPS[state.step] !== "thanks") saveDraft();
+  render();
+}
+
+// ── Submission ───────────────────────────────────────────────
+function payload() {
+  const a = state.answers;
+  const flat = {
+    submittedAt: new Date().toISOString(),
+    name: a.name.trim(),
+    iphone: a.iphone.trim(),
+    design: a.design,
+    keep: a.keep,
+    loved: a.loved.trim(),
+    bugged: a.bugged.trim(),
+    useFor: a.useFor.filter((x) => x !== "Something else").concat(a.useForOther.trim() && a.useFor.includes("Something else") ? ["Other: " + a.useForOther.trim()] : []).join(", "),
+    oneMore: a.oneMore.trim(),
+    userAgent: navigator.userAgent
+  };
+  a.tasks.forEach((t, i) => {
+    flat[`t${i + 1}Score`] = t.score;
+    flat[`t${i + 1}Note`] = t.note.trim();
+  });
+  return flat;
+}
+
+function readableAnswers() {
+  const p = payload();
+  const lines = [`Tone playtest — ${p.name || "Anonymous"}`];
+  if (p.iphone) lines.push(`iPhone: ${p.iphone}`);
+  if (p.design) lines.push(`Design-y: ${p.design}`);
+  lines.push("");
+  TASKS.forEach((t, i) => {
+    const score = p[`t${i + 1}Score`];
+    const note = p[`t${i + 1}Note`];
+    lines.push(`${i + 1}. ${t.short}: ${score}/5 (${EASE_LABELS[score]})${note ? " — " + note : ""}`);
+  });
+  lines.push("", `Keep it: ${p.keep}`);
+  if (p.loved) lines.push(`Loved: ${p.loved}`);
+  if (p.bugged) lines.push(`Bugged me: ${p.bugged}`);
+  if (p.useFor) lines.push(`Would use it for: ${p.useFor}`);
+  if (p.oneMore) lines.push(`One more thing: ${p.oneMore}`);
+  return lines.join("\n");
+}
+
+async function submit() {
+  const next = $("#nextBtn");
+  if (!SCRIPT_URL) { finish(false); return; }
+  next.disabled = true;
+  next.textContent = "Sending…";
+  try {
+    // text/plain avoids a CORS preflight that Apps Script can't answer; the response is opaque.
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload()) });
+    finish(true);
+  } catch (e) {
+    state.sendFailed = true;
+    render(false);
+  }
+}
+
+function finish(sent) {
+  state.sendFailed = !sent;
+  state.submitted = true;
+  // Keep the answers in memory for copy/share; only drop the stored draft once they're safely sent.
+  if (sent) clearDraft();
+  state.step = STEPS.indexOf("thanks");
+  render();
+}
+
+async function copyAnswers(status) {
+  const text = readableAnswers();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const ta = el("textarea", { style: "position:fixed;opacity:0" });
+    ta.value = text;
+    document.body.append(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (err) {}
+    ta.remove();
+  }
+  status.textContent = "Copied! Paste it into a message to Lachie.";
+}
+
+async function shareAnswers(status) {
+  try {
+    await navigator.share({ title: "My Tone playtest answers", text: readableAnswers() });
+  } catch (e) {
+    if (e && e.name !== "AbortError") status.textContent = "Sharing didn't work — try Copy instead.";
+  }
+}
+
+$("#backBtn").addEventListener("click", () => go(-1));
+$("#nextBtn").addEventListener("click", () => {
+  if (!canAdvance()) return;
+  if (STEPS[state.step] === "overall") submit();
+  else go(1);
+});
+
+loadDraft();
+render();
+</script>
+</body>
+</html>
