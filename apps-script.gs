@@ -1,8 +1,8 @@
 /**
- * Tone playtest → Google Sheet
+ * Tone playtest -> Google Sheet
  *
- * Paste this into Extensions → Apps Script on the Sheet that should collect answers,
- * then Deploy → New deployment → Web app (Execute as: Me, Who has access: Anyone).
+ * Paste this into Extensions -> Apps Script on the Sheet that should collect answers,
+ * then Deploy -> New deployment -> Web app (Execute as: Me, Who has access: Anyone).
  * Each form submission appends one row to the first sheet.
  */
 
@@ -28,8 +28,8 @@ const COLUMNS = [
   ["Design-y", "design"]
 ]
   .concat(TASK_NAMES.flatMap((name, i) => [
-    [`${i + 1}. ${name} (0–5)`, `t${i + 1}Score`],
-    [`${i + 1}. ${name} — note`, `t${i + 1}Note`]
+    [`${i + 1}. ${name} (0-5)`, `t${i + 1}Score`],
+    [`${i + 1}. ${name} - note`, `t${i + 1}Note`]
   ]))
   .concat([
     ["Keep it?", "keep"],
