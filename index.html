@@ -83,7 +83,6 @@
   .topbar::before { content: ""; }
   .progress { height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
   .progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.35s ease; }
-  .stepcount { font-size: 13px; color: var(--secondary); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
 
   .notice {
     background: var(--warn-bg); color: var(--warn-text);
@@ -180,7 +179,9 @@
   .other-input { margin-top: 10px; }
 
   /* In-card navigation: back arrow top-left, main button at the bottom */
-  .card-top { margin: -4px 0 48px -4px; }
+  /* Back arrow left, task counter centred; the empty right column mirrors the arrow. */
+  .card-top { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin: -4px -4px 48px; }
+  .stepcount { text-align: center; font-size: 15px; color: var(--secondary); font-variant-numeric: tabular-nums; }
   .back-btn {
     flex: none; width: 40px; height: 40px; border: none; border-radius: 50%;
     background: var(--fill); color: var(--text); cursor: pointer;
@@ -211,7 +212,6 @@
 <main class="page">
   <div class="topbar">
     <div class="progress" aria-hidden="true"><div id="progressFill"></div></div>
-    <span class="stepcount" id="stepCount"></span>
   </div>
   <div class="notice" id="notConnected" hidden>
     Heads up: answers aren't connected to a sheet yet. You can still fill it in and copy your answers at the end.
@@ -461,7 +461,8 @@ const BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 function addCardNav(screen, key) {
   const back = el("button", { class: "back-btn", type: "button", "aria-label": "Back", onclick: () => go(-1) });
   back.innerHTML = BACK_ICON;
-  screen.prepend(el("div", { class: "card-top" }, back));
+  screen.prepend(el("div", { class: "card-top" }, back,
+    key.startsWith("task") ? el("span", { class: "stepcount" }, `${+key.slice(4) + 1}/${TASKS.length}`) : null));
 
   screen.append(el("div", { class: "card-footer" },
     el("button", {
@@ -505,7 +506,6 @@ function renderStep(scrollTop) {
 
   const pct = Math.round((Math.min(state.step, LAST_INPUT_STEP) / LAST_INPUT_STEP) * 100);
   $("#progressFill").style.width = (key === "thanks" ? 100 : pct) + "%";
-  $("#stepCount").textContent = key.startsWith("task") ? `${+key.slice(4) + 1}/${TASKS.length}` : "";
   $("#notConnected").hidden = Boolean(SCRIPT_URL) || key === "thanks";
   updateActions();
   if (scrollTop) window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
