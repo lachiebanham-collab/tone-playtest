@@ -318,7 +318,7 @@ function aboutScreen() {
     el("h1", {}, "A bit about you"),
     el("div", { class: "field" },
       el("label", { class: "q", for: "f-name" }, "Your name"),
-      textInput("name", "So Lachie knows who said what")),
+      textInput("name", "So I know who said what")),
     el("div", { class: "field" },
       el("label", { class: "q q-row", for: "f-iphone" }, "Which iPhone?", el("span", { class: "optional" }, "optional")),
       textInput("iphone", "e.g. iPhone 15 Pro")),
@@ -431,8 +431,8 @@ function thanksScreen() {
   return el("section", { class: "card" },
     el("h1", {}, connected ? "Thank you! Your answers are in." : "Thank you! One last step."),
     el("p", { class: "muted" }, connected
-      ? "Lachie really appreciates it. If you think of anything else later, just send him a message."
-      : "Your answers couldn't be sent automatically. Tap below and send them to Lachie in a message."),
+      ? "I really appreciate it. If you think of anything else later, just send me a message."
+      : "Your answers couldn't be sent automatically. Tap below and send them to me in a message."),
     canShare ? el("button", { class: "btn btn-primary btn-block", type: "button", onclick: () => shareAnswers(status) }, "Send my answers") : null,
     el("button", { class: "btn btn-secondary btn-block", type: "button", onclick: () => copyAnswers(status) }, "Copy my answers"),
     status
@@ -594,7 +594,7 @@ async function copyAnswers(status) {
     try { document.execCommand("copy"); } catch (err) {}
     ta.remove();
   }
-  status.textContent = "Copied! Paste it into a message to Lachie.";
+  status.textContent = "Copied! Paste it into a message to me.";
 }
 
 async function shareAnswers(status) {
