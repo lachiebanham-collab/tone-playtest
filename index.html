@@ -110,7 +110,7 @@
 
   .field { margin-top: 40px; }
   .field label.q, .field .q { display: block; font-size: 17px; font-weight: 500; margin-bottom: 10px; }
-  .optional { font-weight: 400; color: var(--tertiary); font-size: 15px; }
+  .optional { font-weight: 400; color: var(--tertiary); font-size: 15px; white-space: nowrap; }
   input[type="text"], textarea {
     width: 100%; border: none; outline: none;
     background: var(--fill); border-radius: 14px;
@@ -320,7 +320,7 @@ function aboutScreen() {
       el("label", { class: "q", for: "f-name" }, "Your name"),
       textInput("name", "So Lachie knows who said what")),
     el("div", { class: "field" },
-      el("label", { class: "q", for: "f-iphone" }, "Which iPhone? ", el("span", { class: "optional" }, "optional")),
+      el("label", { class: "q q-row", for: "f-iphone" }, "Which iPhone?", el("span", { class: "optional" }, "optional")),
       textInput("iphone", "e.g. iPhone 15 Pro")),
     el("div", { class: "field" },
       el("span", { class: "q" }, "Do you do anything design-y?"),
@@ -391,7 +391,7 @@ function taskScreen(i) {
     el("h1", {}, TASKS[i].text),
     rating,
     el("div", { class: "field" },
-      el("label", { class: "q", for: "f-note" }, "Anything to add? ", el("span", { class: "optional" }, "optional")),
+      el("label", { class: "q q-row", for: "f-note" }, "Anything to add?", el("span", { class: "optional" }, "optional")),
       note)
   );
 }
@@ -405,19 +405,19 @@ function overallScreen() {
       el("span", { class: "q" }, "Would you keep Tone on your phone?"),
       pillGroup(KEEP_OPTIONS, (o) => a.keep === o, (o) => { a.keep = a.keep === o ? "" : o; }, "Would you keep Tone")),
     el("div", { class: "field" },
-      el("label", { class: "q", for: "f-loved" }, "What did you love? ", el("span", { class: "optional" }, "optional")),
+      el("label", { class: "q q-row", for: "f-loved" }, "What did you love?", el("span", { class: "optional" }, "optional")),
       textInput("loved", "Features, feel, anything", true)),
     el("div", { class: "field" },
-      el("label", { class: "q", for: "f-bugged" }, "What bugged you? ", el("span", { class: "optional" }, "optional")),
+      el("label", { class: "q q-row", for: "f-bugged" }, "What bugged you?", el("span", { class: "optional" }, "optional")),
       textInput("bugged", "Confusing bits, bugs, annoyances", true)),
     el("div", { class: "field" },
-      el("span", { class: "q" }, "What would you use it for? ", el("span", { class: "optional" }, "pick any")),
+      el("span", { class: "q q-row" }, "What would you use it for?", el("span", { class: "optional" }, "pick any")),
       pillGroup(USE_OPTIONS, (o) => a.useFor.includes(o), (o) => {
         a.useFor = a.useFor.includes(o) ? a.useFor.filter((x) => x !== o) : [...a.useFor, o];
       }, "What would you use Tone for"),
       otherOn ? el("div", { class: "other-input" }, textInput("useForOther", "Tell us more")) : null),
     el("div", { class: "field" },
-      el("label", { class: "q", for: "f-oneMore" }, "If Tone could do one more thing for you, what would it be? ", el("span", { class: "optional" }, "optional")),
+      el("label", { class: "q q-row", for: "f-oneMore" }, "If Tone could do one more thing for you, what would it be?", el("span", { class: "optional" }, "optional")),
       textInput("oneMore", "Dream big", true)),
     el("div", { class: "status error", id: "sendError", hidden: !state.sendFailed },
       "Couldn't send just now — check your connection and try again, or copy your answers on the next screen.")
