@@ -106,6 +106,7 @@
   .combo-caption { font-size: 12px; color: var(--secondary); margin: 8px 4px 0; }
 
   .eyebrow { font-size: 13px; color: var(--secondary); margin: 24px 0 6px; }
+  .eyebrow:first-child { margin-top: 4px; }
   h1 { font-size: 26px; line-height: 1.23; font-weight: 400; letter-spacing: -0.015em; margin: 0; }
   h2 { font-size: 17px; font-weight: 500; margin: 0 0 10px; letter-spacing: -0.01em; }
   p { margin: 12px 0 0; }
@@ -280,7 +281,6 @@ function pillGroup(options, isOn, onTap, label) {
 // ── Screens ──────────────────────────────────────────────────
 function introScreen() {
   return el("section", { class: "card" },
-    comboBlock(0),
     el("p", { class: "eyebrow" }, "Tone playtest"),
     el("h1", {}, "Hey! Thanks for helping test Tone."),
     el("p", { class: "muted" }, "Tone is a pocket version of Sanzo Wada's A Dictionary of Colour Combinations — swipe through classic colour pairings, save the ones you love, and make palettes of your own."),
