@@ -108,7 +108,7 @@
   ul.tidy { margin: 12px 0 0; padding-left: 20px; color: var(--secondary); font-size: 16px; }
   ul.tidy li + li { margin-top: 6px; }
 
-  .field { margin-top: 28px; }
+  .field { margin-top: 40px; }
   .field label.q, .field .q { display: block; font-size: 17px; font-weight: 500; margin-bottom: 10px; }
   .optional { font-weight: 400; color: var(--tertiary); font-size: 15px; }
   input[type="text"], textarea {
@@ -122,17 +122,52 @@
   ::placeholder { color: var(--tertiary); }
 
   /* Ease scale */
-  .scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-  .scale button {
-    aspect-ratio: 1; max-height: 60px; border: none; border-radius: 16px;
-    background: var(--fill); font-size: 20px; font-variant-numeric: tabular-nums;
-    cursor: pointer; transition: transform 0.12s ease, background 0.15s ease;
+  /* --p (0-1) drives the filled part of the track; the thumb is 28px wide. */
+  .slider {
+    --p: 0;
+    -webkit-appearance: none; appearance: none;
+    display: block; width: 100%; height: 32px; margin: 4px 0 0; padding: 0;
+    background: transparent; cursor: pointer; touch-action: pan-y;
     -webkit-tap-highlight-color: transparent;
   }
-  .scale button:active { transform: scale(0.94); }
-  .scale button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
-  .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--secondary); margin-top: 8px; }
-  .scale-readout { min-height: 22px; margin-top: 10px; font-size: 15px; color: var(--accent); font-weight: 500; }
+  .slider:focus { outline: none; }
+  .slider::-webkit-slider-runnable-track {
+    height: 10px; border-radius: 5px;
+    background: linear-gradient(var(--accent), var(--accent)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
+  }
+  .slider::-moz-range-track {
+    height: 10px; border-radius: 5px;
+    background: linear-gradient(var(--accent), var(--accent)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 28px; height: 28px; margin-top: -9px; border: none; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+    transition: transform 0.12s ease, opacity 0.15s ease;
+  }
+  .slider::-moz-range-thumb {
+    width: 28px; height: 28px; border: none; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  }
+  .slider:active::-webkit-slider-thumb { transform: scale(1.1); }
+  .slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent-soft), 0 1px 4px rgba(0, 0, 0, 0.22); }
+  /* Untouched: no thumb and an empty track, so nothing looks pre-chosen. */
+  .slider.unset::-webkit-slider-runnable-track { background: var(--fill); }
+  .slider.unset::-moz-range-track { background: var(--fill); }
+  .slider.unset::-webkit-slider-thumb { opacity: 0; }
+  .slider.unset::-moz-range-thumb { opacity: 0; }
+
+  .ticks { position: relative; height: 22px; margin: 6px 14px 0; }
+  .ticks button {
+    position: absolute; top: 0; transform: translateX(-50%);
+    border: none; background: none; padding: 0 6px; cursor: pointer;
+    font-size: 14px; color: var(--secondary); font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ticks button.on { color: var(--accent); font-weight: 600; }
+  .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--secondary); margin-top: 2px; }
+  .q-row { display: flex !important; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .scale-readout { font-size: 15px; color: var(--accent); font-weight: 500; white-space: nowrap; }
 
   /* Choice pills */
   .pills { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -145,7 +180,7 @@
   .other-input { margin-top: 10px; }
 
   /* In-card navigation: back arrow top-left, main button at the bottom */
-  .card-top { margin: -4px 0 16px -4px; }
+  .card-top { margin: -4px 0 48px -4px; }
   .back-btn {
     flex: none; width: 40px; height: 40px; border: none; border-radius: 50%;
     background: var(--fill); color: var(--text); cursor: pointer;
@@ -154,7 +189,7 @@
   }
   .back-btn:active { transform: scale(0.94); background: var(--fill-strong); }
   .back-btn svg { width: 18px; height: 18px; }
-  .card-footer { margin-top: 28px; }
+  .card-footer { margin-top: 48px; }
   .card-footer .btn-primary { width: 100%; }
   .btn {
     border: none; border-radius: 999px; padding: 15px 22px; font-size: 17px; cursor: pointer;
@@ -165,9 +200,7 @@
   .btn-primary:disabled { opacity: 0.35; cursor: default; transform: none; }
   .btn-secondary { background: var(--fill-strong); }
   .btn-block { width: 100%; margin-top: 12px; }
-  .card-cta { margin-top: 24px; }
-  .hint { text-align: center; font-size: 13px; color: var(--secondary); margin: 10px 0 0; }
-  .hint:empty { display: none; }
+  .card-cta { margin-top: 48px; }
 
   .status { margin-top: 16px; font-size: 15px; color: var(--secondary); }
   .status.error { color: var(--accent); }
@@ -295,13 +328,38 @@ function aboutScreen() {
 
 function taskScreen(i) {
   const task = state.answers.tasks[i];
-  const readout = el("div", { class: "scale-readout", "aria-live": "polite" }, task.score == null ? "" : EASE_LABELS[task.score]);
-  const scale = el("div", { class: "scale", role: "group", "aria-label": "How easy was that, from 0 (couldn't do it) to 5 (super easy)" },
+  const readout = el("div", { class: "scale-readout", "aria-live": "polite" });
+  const slider = el("input", {
+    type: "range", class: "slider", min: "0", max: "5", step: "1",
+    "aria-label": "How easy was that, from 0 (couldn't do it) to 5 (super easy)"
+  });
+  const ticks = el("div", { class: "ticks" },
     EASE_LABELS.map((label, n) => el("button", {
-      type: "button", "aria-pressed": String(task.score === n),
-      "aria-label": `${n} — ${label}`,
-      onclick: () => { task.score = n; saveDraft(); render(false); }
+      type: "button", tabindex: "-1", "aria-hidden": "true", style: `left:${n * 20}%`,
+      onclick: () => setScore(n)
     }, String(n))));
+
+  // Updated in place (not re-rendered) so a drag isn't interrupted.
+  function paint() {
+    const n = task.score;
+    slider.value = n == null ? 0 : n;
+    slider.classList.toggle("unset", n == null);
+    slider.style.setProperty("--p", n == null ? 0 : n / 5);
+    slider.setAttribute("aria-valuetext", n == null ? "Not rated yet" : `${n} — ${EASE_LABELS[n]}`);
+    ticks.querySelectorAll("button").forEach((b, k) => b.classList.toggle("on", k === n));
+    readout.textContent = n == null ? "" : `${n} · ${EASE_LABELS[n]}`;
+  }
+  function setScore(n) {
+    if (task.score === n) return;
+    task.score = n;
+    saveDraft();
+    paint();
+    updateActions();
+  }
+  slider.addEventListener("input", () => setScore(Number(slider.value)));
+  // A tap on an untouched slider at 0 doesn't fire "input", so catch it here.
+  slider.addEventListener("pointerup", () => setScore(Number(slider.value)));
+  paint();
 
   const note = el("input", {
     type: "text", id: "f-note", autocomplete: "off",
@@ -313,10 +371,10 @@ function taskScreen(i) {
   return el("section", { class: "card" },
     el("h1", {}, TASKS[i].text),
     el("div", { class: "field" },
-      el("span", { class: "q" }, "How easy was that?"),
-      scale,
-      el("div", { class: "scale-ends", "aria-hidden": "true" }, el("span", {}, "0 · Couldn't do it"), el("span", {}, "5 · Super easy")),
-      readout),
+      el("div", { class: "q q-row" }, el("span", {}, "How easy was that?"), readout),
+      slider,
+      ticks,
+      el("div", { class: "scale-ends", "aria-hidden": "true" }, el("span", {}, "Couldn't do it"), el("span", {}, "Super easy"))),
     el("div", { class: "field" },
       el("label", { class: "q", for: "f-note" }, "Anything to add? ", el("span", { class: "optional" }, "optional")),
       note)
@@ -376,20 +434,10 @@ function canAdvance() {
   return true;
 }
 
-function hintFor() {
-  const key = STEPS[state.step];
-  if (canAdvance()) return "";
-  if (key === "about") return "Add your name to keep going";
-  if (key.startsWith("task")) return "Tap a number — 0 if you couldn't do it";
-  if (key === "overall") return "Let us know if you'd keep it";
-  return "";
-}
-
 function updateActions() {
   const next = $("#nextBtn");
   if (!next) return;
   next.disabled = !canAdvance();
-  $("#hint").textContent = hintFor();
 }
 
 const BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
@@ -408,8 +456,7 @@ function addCardNav(screen, key) {
         if (key === "overall") submit();
         else go(1);
       }
-    }, key === "overall" ? "Send answers" : "Next"),
-    el("p", { class: "hint", id: "hint", "aria-live": "polite" })));
+    }, key === "overall" ? "Send answers" : "Next")));
 }
 
 function render(scrollTop = true) {
