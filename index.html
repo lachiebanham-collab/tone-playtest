@@ -152,11 +152,6 @@
   }
   .slider:active::-webkit-slider-thumb { transform: scale(1.1); }
   .slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent-soft), 0 1px 4px rgba(0, 0, 0, 0.22); }
-  /* Untouched: no thumb and an empty track, so nothing looks pre-chosen. */
-  .slider.unset::-webkit-slider-runnable-track { background: var(--fill); }
-  .slider.unset::-moz-range-track { background: var(--fill); }
-  .slider.unset::-webkit-slider-thumb { opacity: 0; }
-  .slider.unset::-moz-range-thumb { opacity: 0; }
 
   .ticks { position: relative; height: 22px; margin: 6px 14px 0; }
   .ticks button {
@@ -232,10 +227,12 @@ const USE_OPTIONS = ["Home & interiors", "Outfits", "Design work", "Art", "Event
 const STEPS = ["intro", "about", ...TASKS.map((_, i) => "task" + i), "overall", "thanks"];
 const LAST_INPUT_STEP = STEPS.indexOf("overall");
 
+const DEFAULT_SCORE = 3;
+
 function blankAnswers() {
   return {
     name: "", iphone: "", design: "",
-    tasks: TASKS.map(() => ({ score: null, note: "" })),
+    tasks: TASKS.map(() => ({ score: DEFAULT_SCORE, note: "" })),
     keep: "", loved: "", bugged: "", useFor: [], useForOther: "", oneMore: ""
   };
 }
@@ -328,6 +325,7 @@ function aboutScreen() {
 
 function taskScreen(i) {
   const task = state.answers.tasks[i];
+  if (task.score == null) task.score = DEFAULT_SCORE; // drafts saved before the default existed
   const readout = el("div", { class: "scale-readout", "aria-live": "polite" });
   const slider = el("input", {
     type: "range", class: "slider", min: "0", max: "5", step: "1",
@@ -342,12 +340,11 @@ function taskScreen(i) {
   // Updated in place (not re-rendered) so a drag isn't interrupted.
   function paint() {
     const n = task.score;
-    slider.value = n == null ? 0 : n;
-    slider.classList.toggle("unset", n == null);
-    slider.style.setProperty("--p", n == null ? 0 : n / 5);
-    slider.setAttribute("aria-valuetext", n == null ? "Not rated yet" : `${n} — ${EASE_LABELS[n]}`);
+    slider.value = n;
+    slider.style.setProperty("--p", n / 5);
+    slider.setAttribute("aria-valuetext", `${n} — ${EASE_LABELS[n]}`);
     ticks.querySelectorAll("button").forEach((b, k) => b.classList.toggle("on", k === n));
-    readout.textContent = n == null ? "" : `${n} · ${EASE_LABELS[n]}`;
+    readout.textContent = `${n} · ${EASE_LABELS[n]}`;
   }
   function setScore(n) {
     if (task.score === n) return;
@@ -357,8 +354,6 @@ function taskScreen(i) {
     updateActions();
   }
   slider.addEventListener("input", () => setScore(Number(slider.value)));
-  // A tap on an untouched slider at 0 doesn't fire "input", so catch it here.
-  slider.addEventListener("pointerup", () => setScore(Number(slider.value)));
   paint();
 
   const note = el("input", {
