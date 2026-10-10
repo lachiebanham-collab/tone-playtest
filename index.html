@@ -78,8 +78,10 @@
   }
 
   /* Top bar */
-  .topbar { display: flex; align-items: center; gap: 12px; padding: 8px 4px 16px; }
-  .progress { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
+  /* Equal-width side columns keep the bar centred; the counter sits in the right one. */
+  .topbar { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: 12px; padding: 8px 0 16px; }
+  .topbar::before { content: ""; }
+  .progress { height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
   .progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.35s ease; }
   .stepcount { font-size: 13px; color: var(--secondary); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
 
