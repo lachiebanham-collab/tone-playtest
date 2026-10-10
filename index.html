@@ -360,6 +360,7 @@ function taskScreen(i) {
     task.touched = true;
     saveDraft();
     paint();
+    updateActions();
   }
   function setScore(n) {
     if (task.score === n) return;
@@ -442,7 +443,7 @@ function canAdvance() {
   const key = STEPS[state.step];
   const a = state.answers;
   if (key === "about") return a.name.trim().length > 0;
-  if (key.startsWith("task")) return a.tasks[+key.slice(4)].score != null;
+  if (key.startsWith("task")) return a.tasks[+key.slice(4)].touched === true;
   if (key === "overall") return a.keep !== "";
   return true;
 }
