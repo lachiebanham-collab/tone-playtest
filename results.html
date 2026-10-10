@@ -106,9 +106,6 @@
   /* Sections */
   section.group { margin-bottom: 40px; }
   .group-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
-  .mini-blocks { flex: none; width: 44px; height: 52px; display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; }
-  .mini-blocks span { flex: 1; border-radius: 10px; margin-top: -8px; position: relative; }
-  .mini-blocks span:first-child { margin-top: 0; }
   .group-title { flex: 1; min-width: 0; }
   .group-title .eyebrow { font-size: 13px; color: var(--secondary); }
   .group-title h2 { font-size: 22px; font-weight: 400; letter-spacing: -0.015em; margin: 1px 0 2px; }
@@ -286,12 +283,6 @@ function strip(t) {
   return el("div", { class: "strip", "aria-hidden": "true" }, taskCombo(t).map((hex) => el("span", { style: `background:${hex}` })));
 }
 
-function miniBlocks(t) {
-  const hexes = taskCombo(t);
-  return el("div", { class: "mini-blocks", "aria-hidden": "true" },
-    hexes.map((hex, i) => el("span", { style: `background:${hex};z-index:${hexes.length - i}` })));
-}
-
 function meter(score) {
   return el("div", { class: "meter", "aria-hidden": "true" },
     [1, 2, 3, 4, 5].map((n) => el("span", { style: score != null && score >= n ? `background:${scoreColour(score)}` : "" })));
@@ -407,7 +398,6 @@ function renderByTask(list) {
       .sort((a, b) => (a.scores[t] ?? 99) - (b.scores[t] ?? 99));
     return el("section", { class: "group" },
       el("div", { class: "group-head" },
-        miniBlocks(t),
         el("div", { class: "group-title" },
           el("div", { class: "eyebrow" }, `Task ${t + 1}`),
           el("h2", {}, TASKS[t].short),
