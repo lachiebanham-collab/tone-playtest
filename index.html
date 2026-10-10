@@ -79,7 +79,6 @@
 
   /* Top bar */
   .topbar { display: flex; align-items: center; gap: 12px; padding: 8px 4px 16px; }
-  .wordmark { font-weight: 500; font-size: 15px; letter-spacing: -0.03em; }
   .progress { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
   .progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.35s ease; }
   .stepcount { font-size: 13px; color: var(--secondary); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
@@ -210,7 +209,6 @@
 <body>
 <main class="page">
   <div class="topbar">
-    <span class="wordmark">tone</span>
     <div class="progress" aria-hidden="true"><div id="progressFill"></div></div>
     <span class="stepcount" id="stepCount"></span>
   </div>
