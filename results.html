@@ -19,7 +19,7 @@
     --hairline: rgba(60, 60, 67, 0.14);
     --accent: #FF2D55;
     --accent-text: #FFFFFF;
-    --s0: #E5484D; --s1: #F06A2B; --s2: #F2A93B; --s3: #C8B826; --s4: #6CBF59; --s5: #2E9E5B;
+    --s0: #E5484D; --s1: #E5484D; --s2: #F08A2B; --s3: #E2AE1E; --s4: #6CBF59; --s5: #2E9E5B;
     --yep: #2E9E5B; --maybe: #E0A21F; --nah: #E5484D;
     color-scheme: light;
   }
@@ -198,6 +198,7 @@
 const KEY_STORAGE = "tone-results-key";
 const PREFS_STORAGE = "tone-results-prefs";
 const PERSON_COLOURS = ["#bf5892", "#008aa1", "#c16b27", "#1c4286", "#00a08a", "#a72144", "#6450a1", "#555832", "#ae5224", "#006eb8", "#84565b", "#3d0079"];
+const gaveUp = (s) => s != null && s <= EASE_MIN;
 const SCORE_VARS = ["--s0", "--s1", "--s2", "--s3", "--s4", "--s5"];
 const KEEP_COLOURS = { Yep: "var(--yep)", Maybe: "var(--maybe)", Nah: "var(--nah)" };
 
@@ -296,13 +297,13 @@ function meter(score) {
 }
 
 function scoreBadge(score) {
-  return el("span", { class: "score", style: `background:${scoreColour(score)}`, title: score == null ? "No score" : `${score} — ${EASE_LABELS[score]}` },
+  return el("span", { class: "score", style: `background:${scoreColour(score)}`, title: score == null ? "No score" : `${score} — ${EASE_LABELS[score] || ""}` },
     score == null ? "–" : String(score));
 }
 
 function avgBar(value) {
   return el("span", { class: "avgbar" },
-    el("span", { class: "track" }, el("span", { class: "fill", style: `display:block;width:${value == null ? 0 : (value / 5) * 100}%;background:${scoreColour(value)}` })),
+    el("span", { class: "track" }, el("span", { class: "fill", style: `display:block;width:${value == null ? 0 : Math.max(0, (value - EASE_MIN) / (EASE_MAX - EASE_MIN)) * 100}%;background:${scoreColour(value)}` })),
     el("strong", {}, value == null ? "–" : value.toFixed(1)), "avg ease");
 }
 
@@ -322,7 +323,7 @@ function answerCard(r, t, mode) {
     el("div", { class: "card-body" },
       head,
       meter(score),
-      el("div", { class: "score-label", style: `color:${scoreColour(score)}` }, score == null ? "No score" : EASE_LABELS[score]),
+      el("div", { class: "score-label", style: `color:${scoreColour(score)}` }, score == null ? "No score" : EASE_LABELS[score] || ""),
       note ? el("div", { class: "note" }, note) : el("div", { class: "note empty" }, "No comment")));
 }
 
@@ -350,14 +351,14 @@ function overallCard(r, showPerson) {
 
 function avgText(r) {
   const a = avg(r.scores);
-  return a == null ? "No scores" : `Avg ease ${a.toFixed(1)} · gave up on ${r.scores.filter((s) => s === 0).length}`;
+  return a == null ? "No scores" : `Avg ease ${a.toFixed(1)} · couldn't do ${r.scores.filter(gaveUp).length}`;
 }
 
 // ── Render ───────────────────────────────────────────────────
 function renderStats(list) {
   const all = list.flatMap((r) => r.scores);
   const overall = avg(all);
-  const gaveUp = all.filter((s) => s === 0).length;
+  const gaveUpTotal = all.filter(gaveUp).length;
   const keeps = { Yep: 0, Maybe: 0, Nah: 0 };
   list.forEach((r) => { if (keeps[r.keep] != null) keeps[r.keep]++; });
   const keepTotal = keeps.Yep + keeps.Maybe + keeps.Nah;
@@ -370,7 +371,7 @@ function renderStats(list) {
     el("div", { class: "stat" }, el("div", { class: "label" }, "Testers"), el("div", { class: "value" }, list.length)),
     el("div", { class: "stat" }, el("div", { class: "label" }, "Average ease"),
       el("div", { class: "value", style: `color:${scoreColour(overall)}` }, overall == null ? "–" : overall.toFixed(1) + " / 5")),
-    el("div", { class: "stat" }, el("div", { class: "label" }, "Times someone gave up"), el("div", { class: "value" }, gaveUp)),
+    el("div", { class: "stat" }, el("div", { class: "label" }, "Times someone couldn't do it"), el("div", { class: "value" }, gaveUpTotal)),
     el("div", { class: "stat" }, el("div", { class: "label" }, "Hardest task"),
       el("div", { class: "value", style: "font-size:17px;margin-top:6px" }, hardest < 0 ? "–" : `${hardest + 1}. ${TASKS[hardest].short}`)),
     el("div", { class: "stat" }, el("div", { class: "label" }, "Would keep Tone"),
@@ -400,7 +401,7 @@ function taskOrder(list) {
 function renderByTask(list) {
   const sections = taskOrder(list).map((t) => {
     const scores = list.map((r) => r.scores[t]);
-    const gaveUp = scores.filter((s) => s === 0).length;
+    const gaveUpCount = scores.filter(gaveUp).length;
     const answered = list.filter((r) => r.scores[t] != null)
       .sort((a, b) => (a.scores[t] ?? 99) - (b.scores[t] ?? 99));
     return el("section", { class: "group" },
@@ -411,7 +412,7 @@ function renderByTask(list) {
           el("h2", {}, TASKS[t].short),
           el("div", { class: "desc" }, TASKS[t].text),
           el("div", { class: "group-meta" }, avgBar(avg(scores)),
-            gaveUp ? el("span", { class: "warn" }, `${gaveUp} gave up`) : null,
+            gaveUpCount ? el("span", { class: "warn" }, `${gaveUpCount} couldn't do it`) : null,
             el("span", {}, `${answered.length} answer${answered.length === 1 ? "" : "s"}`)))),
       answered.length
         ? el("div", { class: "grid" }, answered.map((r) => answerCard(r, t, "task")))
@@ -434,7 +435,7 @@ function renderByPerson(list) {
           el("div", { class: "eyebrow" }, [r.design && `Design-y: ${r.design}`, r.iphone, when && !isNaN(when) && when.toLocaleDateString(undefined, { day: "numeric", month: "short" })].filter(Boolean).join(" · ") || "Tester"),
           el("h2", {}, r.label),
           el("div", { class: "group-meta" }, avgBar(avg(r.scores)),
-            r.scores.some((s) => s === 0) ? el("span", { class: "warn" }, `gave up on ${r.scores.filter((s) => s === 0).length}`) : null))),
+            r.scores.some(gaveUp) ? el("span", { class: "warn" }, `couldn't do ${r.scores.filter(gaveUp).length}`) : null))),
       el("div", { class: "grid" },
         overallCard(r, false),
         taskOrder([r]).map((t) => answerCard(r, t, "person"))));

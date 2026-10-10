@@ -126,6 +126,7 @@
   /* --p (0-1) drives the filled part of the track; the thumb is 28px wide. */
   .slider {
     --p: 0;
+    --track-fill: var(--tertiary);
     -webkit-appearance: none; appearance: none;
     display: block; width: 100%; height: 32px; margin: 4px 0 0; padding: 0;
     background: transparent; cursor: pointer; touch-action: pan-y;
@@ -134,11 +135,11 @@
   .slider:focus { outline: none; }
   .slider::-webkit-slider-runnable-track {
     height: 10px; border-radius: 5px;
-    background: linear-gradient(var(--accent), var(--accent)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
+    background: linear-gradient(var(--track-fill), var(--track-fill)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
   }
   .slider::-moz-range-track {
     height: 10px; border-radius: 5px;
-    background: linear-gradient(var(--accent), var(--accent)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
+    background: linear-gradient(var(--track-fill), var(--track-fill)) 0 0 / calc(14px + var(--p) * (100% - 28px)) 100% no-repeat, var(--fill);
   }
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none;
@@ -160,10 +161,13 @@
     font-size: 14px; color: var(--secondary); font-variant-numeric: tabular-nums;
     -webkit-tap-highlight-color: transparent;
   }
-  .ticks button.on { color: var(--accent); font-weight: 600; }
+  .ticks button.on { color: var(--text); font-weight: 600; }
+  .rating.touched .slider { --track-fill: var(--accent); }
+  .rating.touched .ticks button.on { color: var(--accent); }
   .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--secondary); margin-top: 2px; }
   .q-row { display: flex !important; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .scale-readout { font-size: 15px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+  .scale-readout { font-size: 15px; color: var(--secondary); font-weight: 500; white-space: nowrap; }
+  .rating.touched .scale-readout { color: var(--accent); }
 
   /* Choice pills */
   .pills { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -232,7 +236,7 @@ const DEFAULT_SCORE = 3;
 function blankAnswers() {
   return {
     name: "", iphone: "", design: "",
-    tasks: TASKS.map(() => ({ score: DEFAULT_SCORE, note: "" })),
+    tasks: TASKS.map(() => ({ score: DEFAULT_SCORE, touched: false, note: "" })),
     keep: "", loved: "", bugged: "", useFor: [], useForOther: "", oneMore: ""
   };
 }
@@ -325,26 +329,37 @@ function aboutScreen() {
 
 function taskScreen(i) {
   const task = state.answers.tasks[i];
-  if (task.score == null) task.score = DEFAULT_SCORE; // drafts saved before the default existed
+  // Drafts saved under the old 0-5 scale or before the default existed
+  if (task.score == null || task.score < EASE_MIN || task.score > EASE_MAX) task.score = DEFAULT_SCORE;
   const readout = el("div", { class: "scale-readout", "aria-live": "polite" });
   const slider = el("input", {
-    type: "range", class: "slider", min: "0", max: "5", step: "1",
-    "aria-label": "How easy was that, from 0 (couldn't do it) to 5 (super easy)"
+    type: "range", class: "slider", min: String(EASE_MIN), max: String(EASE_MAX), step: "1",
+    "aria-label": `How easy was that, from ${EASE_MIN} (couldn't do it) to ${EASE_MAX} (super easy)`
   });
+  const steps = EASE_MAX - EASE_MIN;
   const ticks = el("div", { class: "ticks" },
-    EASE_LABELS.map((label, n) => el("button", {
-      type: "button", tabindex: "-1", "aria-hidden": "true", style: `left:${n * 20}%`,
-      onclick: () => setScore(n)
+    Array.from({ length: steps + 1 }, (_, k) => EASE_MIN + k).map((n) => el("button", {
+      type: "button", tabindex: "-1", "aria-hidden": "true", style: `left:${((n - EASE_MIN) / steps) * 100}%`,
+      onclick: () => { touch(); setScore(n); }
     }, String(n))));
+  const rating = el("div", { class: "field rating" });
 
   // Updated in place (not re-rendered) so a drag isn't interrupted.
   function paint() {
     const n = task.score;
     slider.value = n;
-    slider.style.setProperty("--p", n / 5);
+    slider.style.setProperty("--p", (n - EASE_MIN) / steps);
     slider.setAttribute("aria-valuetext", `${n} — ${EASE_LABELS[n]}`);
-    ticks.querySelectorAll("button").forEach((b, k) => b.classList.toggle("on", k === n));
+    ticks.querySelectorAll("button").forEach((b, k) => b.classList.toggle("on", k + EASE_MIN === n));
     readout.textContent = `${n} · ${EASE_LABELS[n]}`;
+    rating.classList.toggle("touched", Boolean(task.touched));
+  }
+  // Grey until the tester engages with it, then the accent colour.
+  function touch() {
+    if (task.touched) return;
+    task.touched = true;
+    saveDraft();
+    paint();
   }
   function setScore(n) {
     if (task.score === n) return;
@@ -353,7 +368,14 @@ function taskScreen(i) {
     paint();
     updateActions();
   }
-  slider.addEventListener("input", () => setScore(Number(slider.value)));
+  slider.addEventListener("pointerdown", touch);
+  slider.addEventListener("keydown", touch);
+  slider.addEventListener("input", () => { touch(); setScore(Number(slider.value)); });
+  rating.append(
+    el("div", { class: "q q-row" }, el("span", {}, "How easy was that?"), readout),
+    slider,
+    ticks,
+    el("div", { class: "scale-ends", "aria-hidden": "true" }, el("span", {}, "Couldn't do it"), el("span", {}, "Super easy")));
   paint();
 
   const note = el("input", {
@@ -365,11 +387,7 @@ function taskScreen(i) {
 
   return el("section", { class: "card" },
     el("h1", {}, TASKS[i].text),
-    el("div", { class: "field" },
-      el("div", { class: "q q-row" }, el("span", {}, "How easy was that?"), readout),
-      slider,
-      ticks,
-      el("div", { class: "scale-ends", "aria-hidden": "true" }, el("span", {}, "Couldn't do it"), el("span", {}, "Super easy"))),
+    rating,
     el("div", { class: "field" },
       el("label", { class: "q", for: "f-note" }, "Anything to add? ", el("span", { class: "optional" }, "optional")),
       note)

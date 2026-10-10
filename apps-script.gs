@@ -28,7 +28,7 @@ const COLUMNS = [
   ["Design-y", "design"]
 ]
   .concat(TASK_NAMES.flatMap((name, i) => [
-    [`${i + 1}. ${name} (0-5)`, `t${i + 1}Score`],
+    [`${i + 1}. ${name} (1-5)`, `t${i + 1}Score`],
     [`${i + 1}. ${name} - note`, `t${i + 1}Note`]
   ]))
   .concat([
@@ -196,13 +196,13 @@ function formatSheet() {
   body(columnIndex("submittedAt")).setNumberFormat("d mmm, h:mm am/pm");
   sheet.hideColumns(columnIndex("__raw"));
 
-  // Colour rules: ease scores 0 (red) -> 5 (green), keep-it answers
+  // Colour rules: ease scores 1 (red) -> 5 (green), keep-it answers
   const rules = [];
   COLUMNS.forEach(([, key], i) => {
     if (!/^t\d+Score$/.test(key)) return;
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .setGradientMinpointWithValue("#F4B6B6", SpreadsheetApp.InterpolationType.NUMBER, "0")
-      .setGradientMidpointWithValue("#FCE8A6", SpreadsheetApp.InterpolationType.NUMBER, "2.5")
+      .setGradientMinpointWithValue("#F4B6B6", SpreadsheetApp.InterpolationType.NUMBER, "1")
+      .setGradientMidpointWithValue("#FCE8A6", SpreadsheetApp.InterpolationType.NUMBER, "3")
       .setGradientMaxpointWithValue("#B7E1CD", SpreadsheetApp.InterpolationType.NUMBER, "5")
       .setRanges([body(i + 1)])
       .build());
@@ -227,7 +227,7 @@ function buildSummary(ss, responses) {
   summary.setConditionalFormatRules([]);
 
   const src = "'" + responses.getName() + "'!";
-  const rows = [["Task", "Avg ease (0-5)", "", "Couldn't do it", "Answers"]];
+  const rows = [["Task", "Avg ease (1-5)", "", "Couldn't do it (1)", "Answers"]];
   TASK_NAMES.forEach((task, i) => {
     const col = columnLetter(columnIndex(`t${i + 1}Score`));
     const range = `${src}${col}2:${col}`;
@@ -236,7 +236,7 @@ function buildSummary(ss, responses) {
       `${i + 1}. ${task}`,
       `=IFERROR(ROUND(AVERAGE(${range}),1),"")`,
       `=IF(B${r}="","",SPARKLINE(B${r},{"charttype","bar";"max",5;"color1","${ACCENT}"}))`,
-      `=COUNTIF(${range},0)`,
+      `=COUNTIF(${range},"<=1")`,
       `=COUNT(${range})`
     ]);
   });
@@ -272,8 +272,8 @@ function buildSummary(ss, responses) {
   const gaveUpRange = summary.getRange(2, 4, TASK_NAMES.length, 1);
   summary.setConditionalFormatRules([
     SpreadsheetApp.newConditionalFormatRule()
-      .setGradientMinpointWithValue("#F4B6B6", SpreadsheetApp.InterpolationType.NUMBER, "0")
-      .setGradientMidpointWithValue("#FCE8A6", SpreadsheetApp.InterpolationType.NUMBER, "2.5")
+      .setGradientMinpointWithValue("#F4B6B6", SpreadsheetApp.InterpolationType.NUMBER, "1")
+      .setGradientMidpointWithValue("#FCE8A6", SpreadsheetApp.InterpolationType.NUMBER, "3")
       .setGradientMaxpointWithValue("#B7E1CD", SpreadsheetApp.InterpolationType.NUMBER, "5")
       .setRanges([avgRange]).build(),
     SpreadsheetApp.newConditionalFormatRule()

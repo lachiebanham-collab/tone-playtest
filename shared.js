@@ -18,7 +18,10 @@ const TASKS = [
   { short: "Hex codes & dark mode", text: "Make the cards show each colour's hex code, then switch the app to dark mode." }
 ];
 
-const EASE_LABELS = ["Couldn't do it", "Really hard", "Pretty tricky", "Got there", "Easy", "Super easy"];
+// Ease scale is 1-5; labels are indexed by score (index 0 unused).
+const EASE_MIN = 1;
+const EASE_MAX = 5;
+const EASE_LABELS = ["", "Couldn't do it", "Pretty tricky", "Got there", "Easy", "Super easy"];
 
 // Real combinations from A Dictionary of Colour Combinations — one per screen.
 const COMBOS = [

@@ -1,6 +1,6 @@
 # Tone playtest
 
-A self-guided feedback form for friends testing Tone on TestFlight. Testers work through 11 tasks in the app, rate each one from 0 (couldn't do it) to 5 (super easy), and share a few overall thoughts. Answers go to a Google Sheet.
+A self-guided feedback form for friends testing Tone on TestFlight. Testers work through 11 tasks in the app, rate each one from 1 (couldn't do it) to 5 (super easy), and share a few overall thoughts. Answers go to a Google Sheet.
 
 **Live form:** https://lachiebanham-collab.github.io/tone-playtest/
 
