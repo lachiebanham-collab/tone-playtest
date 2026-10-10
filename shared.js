@@ -10,7 +10,7 @@ const TASKS = [
   { short: "Pin a colour", text: "You love one particular colour on the card in front of you. Get Tone to only show you combinations that include that colour." },
   { short: "New collection", text: "Put a combination you like into a new collection called “Bedroom”, with a photo as its cover." },
   { short: "Saved + filter", text: "Find everything you've saved, then narrow it down to just the ones with blue in them." },
-  { short: "Similar & Vol 2", text: "Open one of your saved combinations and find a similar one. Then have a look through the second Sanzo Wada book." },
+  { short: "Similar combination", text: "Open one of your saved combinations and find a similar one." },
   { short: "Palette from photo", text: "Make a palette from a photo in your camera roll, change it to 3 colours, and save it." },
   { short: "Share as image", text: "Share that palette as an image. Flick through the layouts and pick the one you like best." },
   { short: "Choose a colour", text: "Find classic combinations that use a green you like." },

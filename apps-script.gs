@@ -12,7 +12,7 @@ const TASK_NAMES = [
   "Pin a colour",
   "New collection",
   "Saved + filter",
-  "Similar & Vol 2",
+  "Similar combination",
   "Palette from photo",
   "Share as image",
   "Choose a colour",
