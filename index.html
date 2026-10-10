@@ -147,8 +147,8 @@
   .other-input { margin-top: 10px; }
 
   /* In-card navigation: back arrow top-left, main button at the bottom */
-  .card-top { display: flex; align-items: center; gap: 12px; margin: -4px 0 16px -4px; }
-  .card-top .eyebrow { margin: 0; }
+  .card-top { margin: -4px 0 16px -4px; }
+  .card-top + .eyebrow { margin-top: 0; }
   .back-btn {
     flex: none; width: 40px; height: 40px; border: none; border-radius: 50%;
     background: var(--fill); color: var(--text); cursor: pointer;
@@ -406,10 +406,7 @@ const BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 function addCardNav(screen, key) {
   const back = el("button", { class: "back-btn", type: "button", "aria-label": "Back", onclick: () => go(-1) });
   back.innerHTML = BACK_ICON;
-  const top = el("div", { class: "card-top" }, back);
-  const eyebrow = screen.querySelector(".eyebrow");
-  if (eyebrow) top.append(eyebrow);
-  screen.prepend(top);
+  screen.prepend(el("div", { class: "card-top" }, back));
 
   screen.append(el("div", { class: "card-footer" },
     el("button", {
