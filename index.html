@@ -425,16 +425,20 @@ function overallScreen() {
 }
 
 function thanksScreen() {
-  const connected = Boolean(SCRIPT_URL) && !state.sendFailed;
+  const sent = Boolean(SCRIPT_URL) && !state.sendFailed;
+  if (sent) {
+    return el("section", { class: "card" },
+      el("h1", {}, "Thank you! Your answers are in."),
+      el("p", { class: "muted" }, "I really appreciate it. If you think of anything else later, just send me a message."));
+  }
+  // Fallback only when the answers didn't reach the sheet: share or copy them instead.
   const status = el("p", { class: "status", id: "copyStatus", "aria-live": "polite" });
   const canShare = typeof navigator.share === "function";
   return el("section", { class: "card" },
-    el("h1", {}, connected ? "Thank you! Your answers are in." : "Thank you! One last step."),
-    el("p", { class: "muted" }, connected
-      ? "I really appreciate it. If you think of anything else later, just send me a message."
-      : "Your answers couldn't be sent automatically. Tap below and send them to me in a message."),
-    canShare ? el("button", { class: "btn btn-primary btn-block", type: "button", onclick: () => shareAnswers(status) }, "Send my answers") : null,
-    el("button", { class: "btn btn-secondary btn-block", type: "button", onclick: () => copyAnswers(status) }, "Copy my answers"),
+    el("h1", {}, "Thank you! One last step."),
+    el("p", { class: "muted" }, "Your answers couldn't be sent automatically. Tap below and send them to me in a message."),
+    canShare ? el("button", { class: "btn btn-primary btn-block card-cta", type: "button", onclick: () => shareAnswers(status) }, "Send my answers") : null,
+    el("button", { class: `btn btn-secondary btn-block${canShare ? "" : " card-cta"}`, type: "button", onclick: () => copyAnswers(status) }, "Copy my answers"),
     status
   );
 }
