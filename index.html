@@ -100,8 +100,6 @@
   @media (prefers-reduced-motion: reduce) { .card { animation: none; } .progress > div { transition: none; } }
 
 
-  .eyebrow { font-size: 13px; color: var(--secondary); margin: 24px 0 6px; }
-  .eyebrow:first-child { margin-top: 4px; }
   h1 { font-size: 26px; line-height: 1.23; font-weight: 400; letter-spacing: -0.015em; margin: 0; }
   h2 { font-size: 17px; font-weight: 500; margin: 0 0 10px; letter-spacing: -0.01em; }
   p { margin: 12px 0 0; }
@@ -148,7 +146,6 @@
 
   /* In-card navigation: back arrow top-left, main button at the bottom */
   .card-top { margin: -4px 0 16px -4px; }
-  .card-top + .eyebrow { margin-top: 0; }
   .back-btn {
     flex: none; width: 40px; height: 40px; border: none; border-radius: 50%;
     background: var(--fill); color: var(--text); cursor: pointer;
@@ -267,7 +264,6 @@ function pillGroup(options, isOn, onTap, label) {
 // ── Screens ──────────────────────────────────────────────────
 function introScreen() {
   return el("section", { class: "card" },
-    el("p", { class: "eyebrow" }, "Tone playtest"),
     el("h1", {}, "Hey! Thanks for helping test Tone."),
     el("p", { class: "muted" }, "Tone is a pocket version of Sanzo Wada's A Dictionary of Colour Combinations — swipe through classic colour pairings, save the ones you love, and make palettes of your own."),
     el("p", { class: "muted" }, "You'll get 11 little tasks. Try each one in the app, then come back here and say how easy it was. Takes about 20–30 minutes."),
@@ -284,7 +280,6 @@ function introScreen() {
 function aboutScreen() {
   const a = state.answers;
   return el("section", { class: "card" },
-    el("p", { class: "eyebrow" }, "First up"),
     el("h1", {}, "A bit about you"),
     el("div", { class: "field" },
       el("label", { class: "q", for: "f-name" }, "Your name"),
@@ -316,7 +311,6 @@ function taskScreen(i) {
   note.value = task.note;
 
   return el("section", { class: "card" },
-    el("p", { class: "eyebrow" }, `Task ${i + 1} of ${TASKS.length}`),
     el("h1", {}, TASKS[i].text),
     el("div", { class: "field" },
       el("span", { class: "q" }, "How easy was that?"),
@@ -333,7 +327,6 @@ function overallScreen() {
   const a = state.answers;
   const otherOn = a.useFor.includes("Something else");
   return el("section", { class: "card" },
-    el("p", { class: "eyebrow" }, "Last bit"),
     el("h1", {}, "Overall thoughts"),
     el("div", { class: "field" },
       el("span", { class: "q" }, "Would you keep Tone on your phone?"),
@@ -363,7 +356,6 @@ function thanksScreen() {
   const status = el("p", { class: "status", id: "copyStatus", "aria-live": "polite" });
   const canShare = typeof navigator.share === "function";
   return el("section", { class: "card" },
-    el("p", { class: "eyebrow" }, connected ? "All sent" : "Nearly done"),
     el("h1", {}, connected ? "Thank you! Your answers are in." : "Thank you! One last step."),
     el("p", { class: "muted" }, connected
       ? "Lachie really appreciates it. If you think of anything else later, just send him a message."
