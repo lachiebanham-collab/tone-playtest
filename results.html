@@ -307,9 +307,9 @@ function answerCard(r, t, mode) {
   return el("article", { class: "card" },
     el("div", { class: "card-body" },
       head,
+      note ? el("div", { class: "note" }, note) : null,
       meter(score),
-      el("div", { class: "score-label", style: `color:${scoreColour(score)}` }, score == null ? "No score" : EASE_LABELS[score] || ""),
-      note ? el("div", { class: "note" }, note) : el("div", { class: "note empty" }, "No comment")));
+      el("div", { class: "score-label", style: `color:${scoreColour(score)}` }, score == null ? "No score" : EASE_LABELS[score] || "")));
 }
 
 function qa(q, a) {
