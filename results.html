@@ -121,18 +121,13 @@
 
   /* Card */
   .card { background: var(--card); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
-  .strip { display: flex; height: 6px; }
-  .strip span { flex: 1; }
+  .task-dot { flex: none; display: inline-block; width: 14px; height: 14px; border-radius: 50%; }
+  .eyebrow .task-dot { width: 10px; height: 10px; margin-right: 6px; vertical-align: 0; }
   .card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
   .card-head { display: flex; align-items: center; gap: 10px; }
   .card-head .who { flex: 1; min-width: 0; }
   .card-head .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-head .sub { font-size: 12px; color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .score {
-    flex: none; min-width: 44px; height: 44px; border-radius: 14px; color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums;
-  }
   .meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
   .meter span { height: 5px; border-radius: 3px; background: var(--fill); }
   .score-label { font-size: 13px; font-weight: 500; }
@@ -277,20 +272,16 @@ function avatar(r, large) {
   return el("span", { class: "avatar" + (large ? " lg" : ""), style: `background:${r.colour}`, "aria-hidden": "true" }, initials(r.name));
 }
 
-function taskCombo(t) { return COMBOS[(t + 2) % COMBOS.length].c.map((c) => c[1]); }
+// One colour per task (Sanzo Wada colours), shown as a dot on its header and every answer card.
+const TASK_COLOURS = ["#bf5892", "#008aa1", "#c16b27", "#1c4286", "#62c6bf", "#9161f2", "#f37f94", "#555832", "#c3a55c", "#84565b", "#3d0079"];
 
-function strip(t) {
-  return el("div", { class: "strip", "aria-hidden": "true" }, taskCombo(t).map((hex) => el("span", { style: `background:${hex}` })));
+function taskDot(t) {
+  return el("span", { class: "task-dot", style: `background:${TASK_COLOURS[t % TASK_COLOURS.length]}`, title: `Task ${t + 1}`, "aria-hidden": "true" });
 }
 
 function meter(score) {
   return el("div", { class: "meter", "aria-hidden": "true" },
     [1, 2, 3, 4, 5].map((n) => el("span", { style: score != null && score >= n ? `background:${scoreColour(score)}` : "" })));
-}
-
-function scoreBadge(score) {
-  return el("span", { class: "score", style: `background:${scoreColour(score)}`, title: score == null ? "No score" : `${score} — ${EASE_LABELS[score] || ""}` },
-    score == null ? "–" : String(score));
 }
 
 function avgBar(value) {
@@ -304,14 +295,13 @@ function answerCard(r, t, mode) {
   const score = r.scores[t];
   const note = r.notes[t];
   const head = mode === "task"
-    ? el("div", { class: "card-head" }, avatar(r), el("div", { class: "who" },
+    ? el("div", { class: "card-head" }, taskDot(t), el("div", { class: "who" },
         el("div", { class: "name" }, r.label),
-        el("div", { class: "sub" }, [r.design, r.iphone].filter(Boolean).join(" · ") || " ")), scoreBadge(score))
-    : el("div", { class: "card-head" }, el("div", { class: "who" },
+        el("div", { class: "sub" }, [r.design, r.iphone].filter(Boolean).join(" · ") || " ")))
+    : el("div", { class: "card-head" }, taskDot(t), el("div", { class: "who" },
         el("div", { class: "sub" }, `Task ${t + 1}`),
-        el("div", { class: "name" }, TASKS[t].short)), scoreBadge(score));
+        el("div", { class: "name" }, TASKS[t].short)));
   return el("article", { class: "card" },
-    strip(t),
     el("div", { class: "card-body" },
       head,
       meter(score),
@@ -328,10 +318,9 @@ function overallCard(r, showPerson) {
   const uses = String(r.useFor || "").split(",").map((s) => s.trim()).filter(Boolean);
   const keep = r.keep ? el("span", { class: "keep-badge", style: `background:${KEEP_COLOURS[r.keep] || "var(--tertiary)"}` }, `Keep it: ${r.keep}`) : null;
   return el("article", { class: "card" },
-    el("div", { class: "strip", "aria-hidden": "true" }, el("span", { style: `background:${r.colour}` })),
     el("div", { class: "card-body" },
       showPerson
-        ? el("div", { class: "card-head" }, avatar(r), el("div", { class: "who" }, el("div", { class: "name" }, r.label),
+        ? el("div", { class: "card-head" }, el("div", { class: "who" }, el("div", { class: "name" }, r.label),
             el("div", { class: "sub" }, avgText(r))), keep)
         : el("div", { class: "card-head" }, el("div", { class: "who" }, el("div", { class: "name" }, "Overall thoughts")), keep),
       qa("Loved", r.loved),
@@ -399,7 +388,7 @@ function renderByTask(list) {
     return el("section", { class: "group" },
       el("div", { class: "group-head" },
         el("div", { class: "group-title" },
-          el("div", { class: "eyebrow" }, `Task ${t + 1}`),
+          el("div", { class: "eyebrow" }, taskDot(t), `Task ${t + 1}`),
           el("h2", {}, TASKS[t].short),
           el("div", { class: "desc" }, TASKS[t].text),
           el("div", { class: "group-meta" }, avgBar(avg(scores)),
