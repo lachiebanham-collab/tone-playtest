@@ -126,6 +126,9 @@
   .card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
   .card-head { display: flex; align-items: center; gap: 10px; }
   .card-head .who { flex: 1; min-width: 0; }
+  /* Task dot on its own row, name stacked beneath. */
+  .card-head.stacked { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .card-head.stacked .who { width: 100%; }
   .card-head .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-head .sub { font-size: 12px; color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
@@ -295,10 +298,10 @@ function answerCard(r, t, mode) {
   const score = r.scores[t];
   const note = r.notes[t];
   const head = mode === "task"
-    ? el("div", { class: "card-head" }, taskDot(t), el("div", { class: "who" },
+    ? el("div", { class: "card-head stacked" }, taskDot(t), el("div", { class: "who" },
         el("div", { class: "name" }, r.label),
         el("div", { class: "sub" }, [r.design, r.iphone].filter(Boolean).join(" · ") || " ")))
-    : el("div", { class: "card-head" }, taskDot(t), el("div", { class: "who" },
+    : el("div", { class: "card-head stacked" }, taskDot(t), el("div", { class: "who" },
         el("div", { class: "sub" }, `Task ${t + 1}`),
         el("div", { class: "name" }, TASKS[t].short)));
   return el("article", { class: "card" },
